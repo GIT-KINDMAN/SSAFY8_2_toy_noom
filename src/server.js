@@ -24,15 +24,17 @@ const sockets = [];
 wss.on("connection", (socket) => {
   // connection이 생기면 socket을 받는다는걸 알 수 있다
   sockets.push(socket); // 연결이 될 때 sockets에 socket을 넣어줄 것이다
+  socket["nickname"] = "annonymous";
   console.log("Connected to Browser!");
   socket.on("close", () => console.log("Disconnected from the browser"));
-  socket.on("message", (message) => {
-    const parsed = JSON.parse(message);
-    switch (parsed.type) {
+  socket.on("message", (msg) => {
+    const message = JSON.parse(msg);
+    switch (message.type) {
       case "new_message":
-        sockets.forEach((aSocket) => aSocket.send(parsed.payload));
+        sockets.forEach((aSocket) =>
+          aSocket.send(`${socket.nickname}: ${message.payload}`));
       case "nickname":
-        console.log(parsed.payload);
+        socket["nickname"] = message.payload;
     }
   });
 });
